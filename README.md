@@ -4,6 +4,10 @@
 
 A sophisticated multi-agent system built with **LangGraph** that analyzes GitHub repository issue trends using specialized AI agents. This system demonstrates advanced agent-to-agent collaboration, intelligent workflow orchestration, and real-time insights generation.
 
+**What we built:** A complete multi-agent workflow that retrieves GitHub repository data, performs time-series analysis, generates strategic insights, and creates comprehensive reports. The system uses LangGraph for agent orchestration, FastAPI for the backend API, and React for an interactive dashboard with real-time WebSocket updates.
+
+**Why we built it:** To demonstrate advanced AI agent collaboration patterns, showcase LangGraph's workflow orchestration capabilities, and provide a practical example of how multiple specialized agents can work together to solve complex data analysis problems.
+
 ![System Architecture](https://img.shields.io/badge/Architecture-Multi--Agent-blue) ![Framework](https://img.shields.io/badge/Framework-LangGraph-green) ![Frontend](https://img.shields.io/badge/Frontend-React-61dafb) ![Backend](https://img.shields.io/badge/Backend-FastAPI-009688)
 
 ## 🎯 Core Capabilities
@@ -47,30 +51,18 @@ graph TD
     L[Agent Memory] --> H
 ```
 
-## 🚀 One-Click Deployment
+## 🚀 How to Run
 
 ### Prerequisites
 - Docker and Docker Compose
 
-**For Demo Mode (No API Keys Required):**
-- Just Docker! 🎭
+### Quick Start (Demo Mode - No API Keys Required)
 
-**For Production Mode:**
-- OpenAI API key
-- GitHub Personal Access Token (optional, for higher rate limits)
-
-### Quick Start
-
-#### 🎭 Demo Mode (No API Keys Required)
-
-1. **Clone the repository**
+1. **Clone and run**
    ```bash
    git clone <repository-url>
    cd github-issue-trend-analyzer
-   ```
-
-2. **One-click demo deployment**
-   ```bash
+   
    # Linux/Mac
    ./start-demo.sh
    
@@ -78,10 +70,24 @@ graph TD
    start-demo.bat
    ```
 
-3. **Access the application**
+2. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
+
+## 📋 Assumptions & Limitations
+
+### Assumptions
+- **Demo Mode**: Uses realistic mock data instead of real GitHub API calls
+- **Repository Format**: Expects GitHub repositories in `owner/repo` format
+- **Analysis Period**: Defaults to 90 days of historical data
+- **Data Quality**: Assumes sufficient issue volume for meaningful analysis
+
+### Limitations
+- **Rate Limiting**: GitHub API rate limits may affect large-scale analysis
+- **Data Freshness**: Analysis is based on historical data, not real-time
+- **Repository Access**: Requires public repositories or proper authentication
+- **Computational Resources**: Complex analysis may require significant processing time
 
 #### 🚀 Production Mode (With Real APIs)
 
