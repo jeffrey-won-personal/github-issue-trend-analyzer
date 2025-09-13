@@ -25,6 +25,8 @@ const App = () => {
   const [sessionData, setSessionData] = useState(null);
   const [currentSession, setCurrentSession] = useState(null);
   const [websocket, setWebsocket] = useState(null);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     // Cleanup websocket on unmount
@@ -35,9 +37,74 @@ const App = () => {
     };
   }, [websocket]);
 
+  // Organic progression animation with step changes
+  const startOrganicProgression = (targetProgress, duration = 4000) => {
+    setIsAnimating(true);
+    setAnimatedProgress(0);
+    
+    const steps = [
+      { name: 'initializing', progress: 0, duration: 0.1 },
+      { name: 'data_retrieval', progress: 25, duration: 0.3 },
+      { name: 'time_series_analysis', progress: 50, duration: 0.4 },
+      { name: 'insights_generation', progress: 75, duration: 0.2 },
+      { name: 'report_generation', progress: 100, duration: 0.1 }
+    ];
+    
+    let currentStepIndex = 0;
+    const startTime = Date.now();
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const totalProgress = Math.min(elapsed / duration, 1);
+      
+      // Find current step based on time
+      let stepProgress = 0;
+      let currentStep = steps[0];
+      
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const stepStartTime = step.duration * duration;
+        
+        if (elapsed <= stepStartTime) {
+          currentStep = step;
+          stepProgress = elapsed / (stepStartTime || 1);
+          break;
+        }
+      }
+      
+      // Use easing function for more organic feel
+      const easeOutCubic = 1 - Math.pow(1 - stepProgress, 3);
+      const currentProgress = Math.round(currentStep.progress * easeOutCubic);
+      
+      setAnimatedProgress(currentProgress);
+      
+      // Update step in session data if it changed
+      if (currentStepIndex !== steps.indexOf(currentStep)) {
+        currentStepIndex = steps.indexOf(currentStep);
+        setSessionData(prev => prev ? {
+          ...prev,
+          current_step: currentStep.name,
+          completion_percentage: currentProgress
+        } : null);
+      }
+      
+      if (totalProgress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setAnimatedProgress(targetProgress);
+        setIsAnimating(false);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  };
+
   const startAnalysis = async (analysisRequest) => {
     try {
       setAnalysisState('running');
+      
+      // Start organic progression animation
+      startOrganicProgression(100, 4000); // 4 seconds to reach 100%
       
       const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/analyze`, {
@@ -102,7 +169,10 @@ const App = () => {
           console.log('Processing state update:', data);
           console.log('Completion percentage:', data.completion_percentage);
           console.log('Current step:', data.current_step);
-          setSessionData(data);
+          setSessionData({
+            ...data,
+            completion_percentage: isAnimating ? animatedProgress : data.completion_percentage
+          });
           
           if (data.completion_percentage >= 100) {
             console.log('Analysis completed, loading results...');
@@ -152,14 +222,14 @@ const App = () => {
         setSessionData({
           session_id: sessionId,
           current_step: data.current_step,
-          completion_percentage: data.completion_percentage,
+          completion_percentage: isAnimating ? animatedProgress : data.completion_percentage,
           agent_statuses: data.agent_statuses,
           latest_progress: data.latest_update
         });
         
         if (data.completion_percentage >= 100) {
           clearInterval(pollInterval);
-          setAnalysisState('completed');
+          // Don't set to completed until results are loaded
           loadResults(sessionId);
         }
       } catch (error) {
@@ -178,9 +248,25 @@ const App = () => {
       const apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiBaseUrl}/results/${sessionId}`);
       const results = await response.json();
-      setSessionData(prev => ({ ...prev, results }));
+      
+      // Ensure we have valid results before proceeding
+      if (results && results.final_report) {
+        setSessionData(prev => ({ ...prev, results }));
+        // Stop animation and set to completed
+        setIsAnimating(false);
+        setAnimatedProgress(100);
+        // Small delay to ensure state is properly updated
+        setTimeout(() => {
+          setAnalysisState('completed');
+        }, 100);
+      } else {
+        console.warn('Results not ready yet, retrying...');
+        // Retry after a short delay
+        setTimeout(() => loadResults(sessionId), 1000);
+      }
     } catch (error) {
       console.error('Error loading results:', error);
+      setAnalysisState('error');
     }
   };
 
@@ -188,6 +274,8 @@ const App = () => {
     setCurrentSession(null);
     setAnalysisState('idle');
     setSessionData(null);
+    setIsAnimating(false);
+    setAnimatedProgress(0);
     if (websocket) {
       websocket.close();
       setWebsocket(null);
@@ -208,40 +296,40 @@ const App = () => {
                     <AnalysisForm onSubmit={startAnalysis} />
                   )}
                   
-                  {analysisState === 'running' && sessionData && (
+                  {(analysisState === 'running' || (analysisState === 'completed' && !sessionData?.results)) && sessionData && (
                     <div>
                       <AnalysisProgress sessionData={sessionData} />
                       <AgentVisualization sessionData={sessionData} />
+                      {analysisState === 'completed' && !sessionData?.results && (
+                        <div style={{ 
+                          background: 'rgba(255, 255, 255, 0.95)', 
+                          padding: '2rem', 
+                          borderRadius: '16px',
+                          textAlign: 'center',
+                          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+                          marginTop: '2rem'
+                        }}>
+                          <h2 style={{ color: '#2d3748', marginBottom: '1rem' }}>Analysis Complete</h2>
+                          <p style={{ color: '#4a5568', marginBottom: '2rem' }}>Loading results...</p>
+                          <div style={{ 
+                            display: 'inline-block',
+                            width: '40px',
+                            height: '40px',
+                            border: '4px solid #e2e8f0',
+                            borderTop: '4px solid #667eea',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                          }} />
+                        </div>
+                      )}
                     </div>
                   )}
                   
-                  {analysisState === 'completed' && (
-                    sessionData?.results ? (
-                      <ResultsDashboard 
-                        results={sessionData.results} 
-                        onReset={resetAnalysis}
-                      />
-                    ) : (
-                      <div style={{ 
-                        background: 'rgba(255, 255, 255, 0.95)', 
-                        padding: '2rem', 
-                        borderRadius: '16px',
-                        textAlign: 'center',
-                        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
-                      }}>
-                        <h2 style={{ color: '#2d3748', marginBottom: '1rem' }}>Analysis Complete</h2>
-                        <p style={{ color: '#4a5568', marginBottom: '2rem' }}>Loading results...</p>
-                        <div style={{ 
-                          display: 'inline-block',
-                          width: '40px',
-                          height: '40px',
-                          border: '4px solid #e2e8f0',
-                          borderTop: '4px solid #667eea',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }} />
-                      </div>
-                    )
+                  {analysisState === 'completed' && sessionData?.results && (
+                    <ResultsDashboard 
+                      results={sessionData.results} 
+                      onReset={resetAnalysis}
+                    />
                   )}
                   
                   {analysisState === 'error' && (
