@@ -12,7 +12,7 @@ This upfront technical specification was crucial; the AI was able to generate mu
 
 ## Code Quality: The Reality
 
-Let me be honest, the initial code the AI generated was pretty rough around the edges. It gave me a good starting structure, but I spent way more time debugging than I expected. The code looked clean and followed good practices on the surface, but there were subtle issues everywhere. Things like mismatched data structures, incorrect API assumptions, and some really confusing state management problems that only showed up at runtime. I had to rewrite significant portions to get everything working properly.
+The initial code the AI generated was pretty rough around the edges. It gave me a good starting structure, but I spent way more time debugging than I expected. The code looked clean and followed good practices on the surface, but there were subtle issues everywhere. Things like mismatched data structures, incorrect API assumptions, and some really confusing state management problems that only showed up at runtime. I had to rewrite significant portions to get everything working properly.
 
 ## Where It Actually Shined
 
