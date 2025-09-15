@@ -4,6 +4,30 @@
 
 A sophisticated multi-agent system built with **LangGraph** that analyzes GitHub repository issue trends using specialized AI agents. This system demonstrates advanced agent-to-agent collaboration, intelligent workflow orchestration, and real-time insights generation.
 
+## 🚀 How to Run
+
+### Prerequisites
+- Docker and Docker Compose
+
+### Quick Start (Demo Mode - No API Keys Required)
+
+1. **Clone and run**
+   ```bash
+   git clone <repository-url>
+   cd github-issue-trend-analyzer
+   
+   # Linux/Mac
+   ./start-demo.sh
+   
+   # Windows
+   start-demo.bat
+   ```
+
+2. **Access the application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
+
 **What we built:** A complete multi-agent workflow that retrieves GitHub repository data, performs time-series analysis, generates strategic insights, and creates comprehensive reports. The system uses LangGraph for agent orchestration, FastAPI for the backend API, and React for an interactive dashboard with real-time WebSocket updates.
 
 **Why we built it:** To demonstrate advanced AI agent collaboration patterns, showcase LangGraph's workflow orchestration capabilities, and provide a practical example of how multiple specialized agents can work together to solve complex data analysis problems.
@@ -51,29 +75,6 @@ graph TD
     L[Agent Memory] --> H
 ```
 
-## 🚀 How to Run
-
-### Prerequisites
-- Docker and Docker Compose
-
-### Quick Start (Demo Mode - No API Keys Required)
-
-1. **Clone and run**
-   ```bash
-   git clone <repository-url>
-   cd github-issue-trend-analyzer
-   
-   # Linux/Mac
-   ./start-demo.sh
-   
-   # Windows
-   start-demo.bat
-   ```
-
-2. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
 
 ## 📋 Assumptions & Limitations
 
